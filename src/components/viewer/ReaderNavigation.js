@@ -28,6 +28,7 @@ export default function ReaderNavigation({ links, indexType, indexPart, indexMod
                 {groupedLinks.map((group, i) => (
                     <div key={i}>
                         {group.map(key => (
+                            // eslint-disable-next-line
                             <Button key={key} part={key} active={key == indexPart} onClick={onIndexPartChange}
                                     inverted compact color="red" size="mini">{key}</Button>
                         ))}
