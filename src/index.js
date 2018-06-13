@@ -16,30 +16,33 @@ class App extends React.Component {
         this.state = {
             indexType: "classic",
             indexPart: "1",
+            showTitles: false,
             loading: false
         };
     }
 
     async componentDidMount() {
-        const links = await fetchLinks();
-        this.setState({ links });
-
-        const session = JSON.parse(localStorage.getItem("cryopod-reader"));
-        if (session) {
-            this.setState({
-                indexType: session.indexType,
-                indexPart: session.indexPart
-            });
-            this.updateText(session.indexType, session.indexPart);
-        } else {
-            this.updateText(this.state.indexType, this.state.indexPart);
-        }
+        fetchLinks().then(links => {
+            this.setState({ links });
+            const session = JSON.parse(localStorage.getItem("cryopod-reader"));
+            if (session) {
+                this.setState({
+                    indexType: session.indexType,
+                    indexPart: session.indexPart,
+                    showTitles: session.showTitles
+                });
+                this.updateText(session.indexType, session.indexPart);
+            } else {
+                this.updateText(this.state.indexType, this.state.indexPart);
+            }
+        });
     };
 
     updateText = (type, part) => {
         localStorage.setItem("cryopod-reader", JSON.stringify({
             indexType: type,
-            indexPart: part
+            indexPart: part,
+            showTitles: this.state.showTitles
         }));
         this.setState({ loading: true });
         fetchPost(type, part).then(post => {
@@ -67,13 +70,23 @@ class App extends React.Component {
         this.updateText(this.state.indexType, part);
     };
 
+    handleShowTitles = showTitles => {
+        localStorage.setItem("cryopod-reader", JSON.stringify({
+            indexType: this.state.indexType,
+            indexPart: this.state.indexPart,
+            showTitles
+        }));
+        this.setState({ showTitles });
+    };
+
     handleScrollRef = scrollRef => this.setState({ scrollRef });
 
     render() {
         return (
             <div>
                 <ReaderMenu indexType={this.state.indexType} onIndexTypeChange={this.handleIndexTypeChange} />
-                <ReaderViewer {...this.state} onIndexPartChange={this.handleIndexPartChange} onScrollRef={this.handleScrollRef} />
+                <ReaderViewer {...this.state} onIndexPartChange={this.handleIndexPartChange}
+                              onScrollRef={this.handleScrollRef} onShowTitles={this.handleShowTitles} />
             </div>
         );
     }

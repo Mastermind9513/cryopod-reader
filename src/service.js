@@ -1,15 +1,18 @@
 import axios from "axios";
 
+// https://www.reddit.com/r/TheCryopodToHell/comments/6z1s7p/part_424b_usurper/
 const classic = {
     linksURL: "https://www.reddit.com/r/TheCryopodToHell/comments/8lu4ql/cryopod_classic_index_list_v30.json",
     textURL: "https://www.reddit.com/r/TheCryopodToHell",
-    regex: /\[Part (\d+).*]\(https:\/\/redd.it\/(.+)\)|\[Part (\d+).*]\(https:\/\/www.reddit.com\/comments\/(.+)\/_\/(.+)\)/g
+    regex: /\[Part (\d+)(.*)]\(https?:\/\/redd.it\/(.+)\)|\[Part (\d+)(.*)]\(https?:\/\/www.reddit.com\/(?:r\/\w+\/)?comments\/(?:(.+)\/_\/(.+)|(.+)\/(?:.*))\)/g
+    //               1   2                          3    |         4   5                                                        6        7    8
 };
 
 const refresh = {
     linksURL: "https://www.reddit.com/r/TheCryopodToHell/comments/8lu5j9/cryopod_refresh_index_list.json",
     textURL: "https://www.reddit.com/r/TheCryopodToHell",
-    regex: /\[Cryopod Refresh (\d+): .+]\(https:\/\/redd.it\/(.+)\)/g
+    regex: /\[Cryopod Refresh (\d+): (.+)]\(https:\/\/redd.it\/(.+)\)/g
+    //                          1     2                         3
 };
 
 const links = {
@@ -26,12 +29,16 @@ export async function fetchLinks() {
     const classicText = classicResponse.data[0].data.children[0].data.selftext;
     let match;
     while (!!(match = classic.regex.exec(classicText))) {
-        if (match[1] && match[2]) {
-            links.classic[match[1]] = match[2];
-        } else if (match[3] && match[4] && match[5]) {
-            links.classic[match[3]] = `${match[4]}/_/${match[5]}`;
-        } else {
-            throw new Error(`Invalid match: ${match[0]}`);
+        if (match[1]) {
+            links.classic[match[1]] = {
+                title: `Part ${match[1]}${match[2] || ""}`,
+                hash: match[3]
+            };
+        } else if (match[4]) {
+            links.classic[match[4]] = {
+                title: `Part ${match[4]}${match[5] || ""}`,
+                hash: match[8] || `${match[6]}/_/${match[7]}`
+            };
         }
     }
 
@@ -39,7 +46,10 @@ export async function fetchLinks() {
     const refreshResponse = await axios.get(refresh.linksURL);
     const refreshText = refreshResponse.data[0].data.children[0].data.selftext;
     while (!!(match = refresh.regex.exec(refreshText))) {
-        links.refresh[match[1]] = match[2];
+        links.refresh[match[1]] = {
+            title: `${match[1]}: ${match[2]}`,
+            hash: match[3]
+        };
     }
 
     return links;
@@ -57,9 +67,9 @@ export async function fetchPost(type, part) {
         } else {
             url = `${classic.textURL}/`;
         }
-        url += links.classic[part];
+        url += links.classic[part].hash;
     } else if (type === "refresh") {
-        url = `${refresh.textURL}/${links.refresh[part]}`;
+        url = `${refresh.textURL}/${links.refresh[part].hash}`;
     } else {
         throw new Error(`Unknown type: ${type}`);
     }
