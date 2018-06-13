@@ -4,8 +4,8 @@ import axios from "axios";
 const classic = {
     linksURL: "https://www.reddit.com/r/TheCryopodToHell/comments/8lu4ql/cryopod_classic_index_list_v30.json",
     textURL: "https://www.reddit.com/r/TheCryopodToHell",
-    regex: /\[Part (\d+)(.*)]\(https?:\/\/redd.it\/(.+)\)|\[Part (\d+)(.*)]\(https?:\/\/www.reddit.com\/(?:r\/\w+\/)?comments\/(?:(.+)\/_\/(.+)|(.+)\/(?:.*))\)/g
-    //               1   2                          3    |         4   5                                                        6        7    8
+    regex: /\[Part (\d+)(.*)]\(https?:\/\/redd.it\/(\w+)\)|\[Part (\d+)(.*)]\(https?:\/\/www.reddit.com\/(?:r\/\w+\/)?comments\/(?:(\w+)\/_\/(\w+)|(\w+)\/(?:.*))\)/g
+    //               1   2                           3    |         4   5                                                            6         7     8
 };
 
 const refresh = {

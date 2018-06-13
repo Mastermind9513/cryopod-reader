@@ -66,14 +66,14 @@ function getPanels(links, type, showTitles, size) {
 /**
  * Internal component for displaying rows of links
  */
-function GroupedLinks({ links, part, onIndexPartChange }) {
+function GroupedLinks({ reference, links, part, onIndexPartChange }) {
     return (
         <Segment basic>
             {links.map((group, i) => (
                 <div key={i}>
                     {group.map(key => (
-                        <Button key={key} part={key} active={key == part} onClick={onIndexPartChange}
-                                inverted compact color="red" size="mini">{key}</Button>
+                        <Popup key={key} trigger={<Button part={key} active={key == part} onClick={onIndexPartChange} inverted compact color="red" size="mini">{key}</Button>}
+                               content={reference[key].title} />
                     ))}
                 </div>
             ))}
@@ -114,7 +114,7 @@ export default class ReaderNavigation extends React.Component {
             content: {
                 key: panel.key,
                 content: showTitles ? <TitledLinks reference={selectedReference} links={panel.links} part={indexPart} onIndexPartChange={onIndexPartChange} /> :
-                                      <GroupedLinks links={panel.links} part={indexPart} onIndexPartChange={onIndexPartChange} />
+                                      <GroupedLinks reference={selectedReference} links={panel.links} part={indexPart} onIndexPartChange={onIndexPartChange} />
             }
         }));
 
@@ -124,7 +124,7 @@ export default class ReaderNavigation extends React.Component {
                     <Popup trigger={<Button active={!showTitles} onClick={() => onShowTitles(false)} icon="grid layout" />} content="Show part numbers only" />
                     <Popup trigger={<Button active={showTitles} onClick={() => onShowTitles(true)} icon="list layout" />} content="Show part titles" />
                 </Button.Group>
-                <Accordion panels={panels} inverted exclusive={false} />
+                <Accordion panels={panels} inverted />
             </Sticky>
         );
     }
