@@ -14,7 +14,9 @@ export default function ReaderViewer(props) {
                 <ReaderNavigation {...props} />
             </Grid.Column>
             <Grid.Column width={12} color="black">
-                <ReaderText {...props} />
+                <div ref={props.onScrollRef}>
+                    <ReaderText {...props} />
+                </div>
             </Grid.Column>
         </Grid>
     );

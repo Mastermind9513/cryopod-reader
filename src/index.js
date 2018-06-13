@@ -14,11 +14,8 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            links: null,
             indexType: "classic",
             indexPart: "1",
-            text: "",
-            title: "",
             loading: false
         };
     }
@@ -52,6 +49,7 @@ class App extends React.Component {
                 loading: false
             });
         });
+        window.scrollTo(0, 0);
     };
 
     handleIndexTypeChange = (e, { name }) => {
@@ -69,11 +67,13 @@ class App extends React.Component {
         this.updateText(this.state.indexType, part);
     };
 
+    handleScrollRef = scrollRef => this.setState({ scrollRef });
+
     render() {
         return (
             <div>
                 <ReaderMenu indexType={this.state.indexType} onIndexTypeChange={this.handleIndexTypeChange} />
-                <ReaderViewer {...this.state} onIndexPartChange={this.handleIndexPartChange} />
+                <ReaderViewer {...this.state} onIndexPartChange={this.handleIndexPartChange} onScrollRef={this.handleScrollRef} />
             </div>
         );
     }
