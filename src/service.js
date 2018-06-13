@@ -1,12 +1,6 @@
 import axios from "axios";
 
-const original = {
-    linksURL: "https://www.reddit.com/r/klokinator/comments/7qo9tr/index_list.json",
-    textURL: "https://www.reddit.com/r/klokinator",
-    regex: /\[Part (\d+).*]\(https:\/\/redd.it\/(.+)\)/g
-};
-
-const rewrite = {
+const classic = {
     linksURL: "https://www.reddit.com/r/TheCryopodToHell/comments/8lu4ql/cryopod_classic_index_list_v30.json",
     textURL: "https://www.reddit.com/r/TheCryopodToHell",
     regex: /\[Part (\d+).*]\(https:\/\/redd.it\/(.+)\)|\[Part (\d+).*]\(https:\/\/www.reddit.com\/comments\/(.+)\/_\/(.+)\)/g
@@ -19,8 +13,7 @@ const refresh = {
 };
 
 const links = {
-    original: {},
-    rewrite: {},
+    classic: {},
     refresh: {}
 };
 
@@ -28,22 +21,15 @@ const fromPrompts = ["1", "2", "3", "4", "5", "6", "8"];
 const fromKlokinator = ["7"];
 
 export async function fetchLinks() {
-    // fetch Cryopod Classic - Original links
-    const originalResponse = await axios.get(original.linksURL);
-    const originalText = originalResponse.data[0].data.children[0].data.selftext;
+    // fetch Cryopod Classic links
+    const classicResponse = await axios.get(classic.linksURL);
+    const classicText = classicResponse.data[0].data.children[0].data.selftext;
     let match;
-    while (!!(match = original.regex.exec(originalText))) {
-        links.original[match[1]] = match[2];
-    }
-
-    // fetch Cryopod Classic - Rewrite links
-    const rewriteResponse = await axios.get(rewrite.linksURL);
-    const rewriteText = rewriteResponse.data[0].data.children[0].data.selftext;
-    while (!!(match = rewrite.regex.exec(rewriteText))) {
+    while (!!(match = classic.regex.exec(classicText))) {
         if (match[1] && match[2]) {
-            links.rewrite[match[1]] = match[2];
+            links.classic[match[1]] = match[2];
         } else if (match[3] && match[4] && match[5]) {
-            links.rewrite[match[3]] = `${match[4]}/_/${match[5]}`;
+            links.classic[match[3]] = `${match[4]}/_/${match[5]}`;
         } else {
             throw new Error(`Invalid match: ${match[0]}`);
         }
@@ -59,25 +45,19 @@ export async function fetchLinks() {
     return links;
 }
 
-export async function fetchPost(type, part, mode) {
+export async function fetchPost(type, part) {
     let url;
     let fromComment = false;
     if (type === "classic") {
-        if (mode === "original") {
-            url = `${original.textURL}/${links.original[part]}`;
-        } else if (mode === "rewrite") {
-            if (fromPrompts.includes(part.toString())) {
-                url = "https://www.reddit.com/comments/";
-                fromComment = true;
-            } else if (fromKlokinator.includes(part.toString())) {
-                url = `${original.textURL}/`;
-            } else {
-                url = `${rewrite.textURL}/`;
-            }
-            url += links.rewrite[part];
+        if (fromPrompts.includes(part.toString())) {
+            url = "https://www.reddit.com/comments/";
+            fromComment = true;
+        } else if (fromKlokinator.includes(part.toString())) {
+            url = "https://www.reddit.com/r/klokinator/";
         } else {
-            throw new Error(`Unknown mode: ${mode}`);
+            url = `${classic.textURL}/`;
         }
+        url += links.classic[part];
     } else if (type === "refresh") {
         url = `${refresh.textURL}/${links.refresh[part]}`;
     } else {

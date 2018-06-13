@@ -1,8 +1,8 @@
 import React from "react";
 import { Grid } from "semantic-ui-react";
 
-import ReaderText from "./ReaderText";
 import ReaderNavigation from "./ReaderNavigation";
+import ReaderText from "./ReaderText";
 
 /**
  * Main reader component

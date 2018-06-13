@@ -15,9 +15,8 @@ class App extends React.Component {
         super(props);
         this.state = {
             links: null,
-            indexType: "classic", // TODO: types: "classic", "refresh"
+            indexType: "classic",
             indexPart: "1",
-            indexMode: "original", // TODO: modes: "original", "rewrite" (classic), null (refresh)
             text: "",
             title: "",
             loading: false
@@ -32,23 +31,21 @@ class App extends React.Component {
         if (session) {
             this.setState({
                 indexType: session.indexType,
-                indexPart: session.indexPart,
-                indexMode: session.indexMode
+                indexPart: session.indexPart
             });
-            this.updateText(session.indexType, session.indexPart, session.indexMode);
+            this.updateText(session.indexType, session.indexPart);
         } else {
-            this.updateText(this.state.indexType, this.state.indexPart, this.state.indexMode);
+            this.updateText(this.state.indexType, this.state.indexPart);
         }
     };
 
-    updateText = (type, part, mode) => {
+    updateText = (type, part) => {
         localStorage.setItem("cryopod-reader", JSON.stringify({
             indexType: type,
-            indexPart: part,
-            indexMode: mode
+            indexPart: part
         }));
         this.setState({ loading: true });
-        fetchPost(type, part, mode).then(post => {
+        fetchPost(type, part).then(post => {
             this.setState({
                 text: post.text,
                 title: post.title || `Part ${part}`,
@@ -58,36 +55,25 @@ class App extends React.Component {
     };
 
     handleIndexTypeChange = (e, { name }) => {
-        const mode = (name === "classic") ? "original" : "refresh";
         this.setState({
             indexType: name,
-            indexPart: "1",
-            indexMode: mode
+            indexPart: "1"
         });
-        this.updateText(name, "1", mode);
+        this.updateText(name, "1");
     };
 
     handleIndexPartChange = (e, { part }) => {
         this.setState({
             indexPart: part
         });
-        this.updateText(this.state.indexType, part, this.state.indexMode);
-    };
-
-    handleIndexModeChange = (e, { mode }) => {
-        this.setState({
-            indexMode: mode
-        });
-        // if moving to "original", but beyond part 472C in "rewrite", then just go back to 472C
-        let part = (mode === "original" && parseInt(this.state.indexPart, 10) > 472) ? "472" : this.state.indexPart;
-        this.updateText(this.state.indexType, part, mode);
+        this.updateText(this.state.indexType, part);
     };
 
     render() {
         return (
             <div>
                 <ReaderMenu indexType={this.state.indexType} onIndexTypeChange={this.handleIndexTypeChange} />
-                <ReaderViewer {...this.state} onIndexPartChange={this.handleIndexPartChange} onIndexModeChange={this.handleIndexModeChange} />
+                <ReaderViewer {...this.state} onIndexPartChange={this.handleIndexPartChange} />
             </div>
         );
     }

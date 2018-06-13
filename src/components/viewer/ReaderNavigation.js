@@ -9,21 +9,12 @@ function groupLinks(links, size) {
     return grouped;
 }
 
-export default function ReaderNavigation({ links, indexType, indexPart, indexMode, onIndexPartChange, onIndexModeChange }) {
-    const selectedLinks = links ? Object.keys(links[indexMode]) : [];
+export default function ReaderNavigation({ links, indexType, indexPart, onIndexPartChange }) {
+    const selectedLinks = links ? Object.keys(links[indexType]) : [];
     const groupedLinks = groupLinks(selectedLinks, 10);
 
     return (
         links && <div>
-            {(indexType === "classic") && (
-                <Segment basic>
-                    <Button.Group>
-                        <Button mode="original" onClick={onIndexModeChange} active={indexMode === "original"} inverted compact color="red">Original</Button>
-                        <Button.Or text="|" />
-                        <Button mode="rewrite" onClick={onIndexModeChange} active={indexMode === "rewrite"} inverted compact color="red">Rewrite</Button>
-                    </Button.Group>
-                </Segment>
-            )}
             <Segment basic>
                 {groupedLinks.map((group, i) => (
                     <div key={i}>
